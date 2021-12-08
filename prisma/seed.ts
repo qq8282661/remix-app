@@ -17,7 +17,7 @@ async function seed() {
   );
 }
 
-seed();
+// seed();
 
 function getJokes() {
   // shout-out to https://icanhazdadjoke.com/
@@ -53,3 +53,7 @@ function getJokes() {
     },
   ];
 }
+
+(async () => {
+  await prisma.photo.create({ data: { title: '666' } });
+})();
