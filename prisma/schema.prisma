@@ -11,25 +11,65 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  username     String   @unique
+  id           String         @id @default(cuid())
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now()) @updatedAt
+  username     String         @unique
   passwordHash String
   jokes        Joke[]
+  roles        RolesOnUsers[]
 }
 
 model Joke {
-  id         String   @id @default(uuid())
+  id         String   @id @default(cuid())
   jokesterId String
   jokester   User     @relation(fields: [jokesterId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  updatedAt  DateTime @default(now()) @updatedAt
   name       String
   content    String
 }
 
 model Photo {
-  id    String @id @default(cuid())
-  title String
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Role {
+  id          String         @id @default(cuid())
+  title       String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @default(now()) @updatedAt
+  users       RolesOnUsers[]
+  premissions Premission[]
+}
+
+model RolesOnUsers {
+  userId String
+  roleId String
+  user   User   @relation(fields: [userId], references: [id])
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
+}
+
+model Premission {
+  id        String   @id @default(cuid())
+  method    String
+  path      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  roles     Role[]
+}
+
+model Menu {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  parentId  String?
+  parent    Menu?    @relation("MenuTree", fields: [parentId], references: [id])
+  children  Menu[]   @relation("MenuTree")
 }
