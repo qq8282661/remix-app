@@ -12,6 +12,17 @@ declare global {
 if (process.env.NODE_ENV === 'production') {
   db = new PrismaClient();
   db.$connect();
+  db.$use(async (params, next) => {
+    const before = Date.now();
+
+    const result = await next(params);
+
+    const after = Date.now();
+
+    console.log(`Query ${params.model}.${params.action} took ${after - before}ms ${params.args}`);
+
+    return result;
+  });
 } else {
   if (!global.__db) {
     global.__db = new PrismaClient();

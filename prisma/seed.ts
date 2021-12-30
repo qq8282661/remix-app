@@ -1,6 +1,18 @@
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
+prisma.$use(async (params, next) => {
+  const before = Date.now();
+
+  const result = await next(params);
+
+  const after = Date.now();
+  console.log(params);
+
+  console.log(`Query ${params.model}.${params.action} took ${after - before}ms `);
+
+  return result;
+});
 
 // seed();
 
@@ -57,20 +69,7 @@ async function seed() {
 }
 
 (async () => {
-  await prisma.photo.create({ data: { title: '666' } });
-  await prisma.user.create({
-    data: {
-      username: 'tom',
-      passwordHash: '666',
-      roles: {
-        create: [
-          {
-            role: {
-              create: { title: 'admin' },
-            },
-          },
-        ],
-      },
-    },
-  });
+  const data = await prisma.user.findMany({ include: { roles: true, jokes: true, _count: true } });
+
+  console.log(data);
 })();
