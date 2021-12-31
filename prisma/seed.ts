@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ log: ['query', 'info', 'warn', 'error'] });
 prisma.$use(async (params, next) => {
   const before = Date.now();
 
@@ -69,7 +69,10 @@ async function seed() {
 }
 
 (async () => {
-  const data = await prisma.user.findMany({ include: { roles: true, jokes: true, _count: true } });
-
+  const data = await prisma.user.findMany({ include: { roles: true, jokes: true } });
   console.log(data);
+  const data1 = await prisma.$queryRaw`SELECT * FROM Joke`;
+  console.log(data1);
+  const data2 = await prisma.role.findMany();
+  console.log(data2);
 })();
