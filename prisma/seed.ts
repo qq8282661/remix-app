@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Joke } from '@prisma/client';
+import { knex } from 'knex';
 
 const prisma = new PrismaClient({ log: ['query', 'info', 'warn', 'error'] });
 prisma.$use(async (params, next) => {
@@ -68,11 +69,29 @@ async function seed() {
   );
 }
 
+// (async () => {
+//   const data = await prisma.user.findMany({ include: { roles: true, jokes: true } });
+//   console.log(data);
+//   const data1 = await prisma.$queryRaw`SELECT * FROM Joke`;
+//   console.log(data1);
+//   const data2 = await prisma.role.findMany();
+//   console.log(data2);
+// })();
+
 (async () => {
-  const data = await prisma.user.findMany({ include: { roles: true, jokes: true } });
+  const db = knex({
+    client: 'sqlite3',
+    connection: { filename: __dirname + '/dev.db' },
+    useNullAsDefault: true,
+    pool: { min: 1, max: 8 },
+    debug: true,
+  });
+  const data = await db<Joke[]>('Joke').select();
   console.log(data);
-  const data1 = await prisma.$queryRaw`SELECT * FROM Joke`;
-  console.log(data1);
-  const data2 = await prisma.role.findMany();
-  console.log(data2);
+  const theOne = await db<Joke>('Joke')
+    .where({ id: '6cf73c85-cb60-466d-a689-9041bb1035ce' })
+    .first();
+  console.log('theOne', theOne);
+  const user = await db('User').select('*').leftJoin('Joke', 'User.id', 'Joke.jokesterId');
+  console.log(user);
 })();
