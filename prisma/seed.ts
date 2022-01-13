@@ -85,13 +85,38 @@ async function seed() {
     useNullAsDefault: true,
     pool: { min: 1, max: 8 },
     debug: true,
+    postProcessResponse: (result, queryContext) => {
+      // TODO: add special case for raw results (depends on dialect)
+      if (Array.isArray(result)) {
+        return result.map((row) => convertToCamel(row));
+      } else {
+        return convertToCamel(result);
+      }
+    },
   });
+
   const data = await db<Joke[]>('Joke').select();
   console.log(data);
+
   const theOne = await db<Joke>('Joke')
     .where({ id: '6cf73c85-cb60-466d-a689-9041bb1035ce' })
     .first();
   console.log('theOne', theOne);
+
   const user = await db('User').select('*').leftJoin('Joke', 'User.id', 'Joke.jokesterId');
-  console.log(user);
+  console.log('user', user);
 })();
+
+function convertToCamel(row: any): any {
+  if (typeof row != 'object' || !row) return row;
+  if (Array.isArray(row)) {
+    return row.map((item) => convertToCamel(item));
+  }
+
+  const newData: any = {};
+  for (let key in row) {
+    let newKey = key.replace(/_([a-z])/g, (p, m) => m.toUpperCase());
+    newData[newKey] = convertToCamel(row[key]);
+  }
+  return newData;
+}
