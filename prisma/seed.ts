@@ -95,12 +95,10 @@ async function seed() {
     },
   });
 
-  const data = await db<Joke[]>('Joke').select();
+  const data = await db<Joke>('Joke').select();
   console.log(data);
 
-  const theOne = await db<Joke>('Joke')
-    .where({ id: '6cf73c85-cb60-466d-a689-9041bb1035ce' })
-    .first();
+  const theOne = await db<Joke>('Joke').where({ id: '1' }).first();
   console.log('theOne', theOne);
 
   const user = await db('User').select('*').leftJoin('Joke', 'User.id', 'Joke.jokesterId');
